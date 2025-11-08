@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>营养摄入追踪器</title>
+    <title>平衡膳食追踪器</title>
     <style>
         * {
             margin: 0;
@@ -44,119 +44,175 @@
             margin-top: 5px;
         }
         
-        .stats-container {
-            display: flex;
-            justify-content: space-between;
+        .dashboard {
             padding: 15px;
-            background-color: white;
-            margin: 10px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
-        .stat-item {
-            text-align: center;
-            flex: 1;
+        .dashboard-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1d1d1f;
         }
         
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: #4CAF50;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #8e8e93;
-            margin-top: 4px;
-        }
-        
-        .meal-section {
-            margin: 15px;
+        .intake-card {
             background-color: white;
             border-radius: 12px;
-            overflow: hidden;
+            padding: 15px;
+            margin-bottom: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
         }
         
-        .meal-header {
-            padding: 12px 15px;
-            background-color: #f8f8f8;
+        .intake-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #e5e5e7;
+            margin-bottom: 10px;
         }
         
-        .meal-title {
+        .intake-name {
             font-size: 16px;
             font-weight: 600;
         }
         
-        .add-food-btn {
+        .intake-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .status-normal {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-low {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .status-high {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .intake-bar-container {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .intake-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .bar-normal {
             background-color: #4CAF50;
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            cursor: pointer;
         }
         
-        .food-list {
-            padding: 10px 0;
+        .bar-low {
+            background-color: #ff9800;
         }
         
-        .food-item {
+        .bar-high {
+            background-color: #f44336;
+        }
+        
+        .intake-info {
             display: flex;
             justify-content: space-between;
-            padding: 12px 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .food-item:last-child {
-            border-bottom: none;
-        }
-        
-        .food-name {
-            font-size: 16px;
-        }
-        
-        .food-calories {
-            font-size: 14px;
+            font-size: 12px;
             color: #8e8e93;
         }
         
-        .nutrition-cards {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 0 10px;
-            margin-bottom: 15px;
+        .intake-current {
+            font-weight: 600;
+            color: #1d1d1f;
         }
         
-        .nutrition-card {
-            width: calc(50% - 20px);
-            margin: 10px;
+        .intake-target {
+            font-weight: 500;
+        }
+        
+        .quick-add-section {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        
+        .quick-add-btn {
+            flex: 1;
+            margin: 0 5px;
+            padding: 12px 0;
+            background-color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .quick-add-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-dairy {
+            color: #2196F3;
+        }
+        
+        .btn-meat {
+            color: #FF5722;
+        }
+        
+        .btn-water {
+            color: #03A9F4;
+        }
+        
+        .history-section {
             background-color: white;
             border-radius: 12px;
             padding: 15px;
+            margin-top: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            text-align: center;
         }
         
-        .nutrition-value {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .history-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
         
-        .nutrition-label {
-            font-size: 12px;
-            color: #8e8e93;
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-name {
+            font-size: 14px;
+        }
+        
+        .history-amount {
+            font-size: 14px;
+            font-weight: 500;
         }
         
         .add-button {
@@ -272,7 +328,7 @@
         
         .empty-state {
             text-align: center;
-            padding: 30px 15px;
+            padding: 20px 15px;
             color: #8e8e93;
         }
         
@@ -285,143 +341,115 @@
         .empty-text {
             font-size: 14px;
         }
+        
+        .alert-banner {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px 15px;
+            margin: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>营养摄入追踪器</h1>
+        <h1>平衡膳食追踪器</h1>
         <div class="date-display" id="currentDate">2023年11月15日</div>
     </header>
     
-    <div class="stats-container">
-        <div class="stat-item">
-            <div class="stat-value" id="totalCalories">0</div>
-            <div class="stat-label">卡路里</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="totalProtein">0g</div>
-            <div class="stat-label">蛋白质</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="totalCarbs">0g</div>
-            <div class="stat-label">碳水</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="totalFat">0g</div>
-            <div class="stat-label">脂肪</div>
-        </div>
-    </div>
+    <div class="alert-banner" id="alertBanner"></div>
     
-    <div class="nutrition-cards">
-        <div class="nutrition-card">
-            <div class="nutrition-value" id="fiberValue">0g</div>
-            <div class="nutrition-label">膳食纤维</div>
-        </div>
-        <div class="nutrition-card">
-            <div class="nutrition-value" id="sugarValue">0g</div>
-            <div class="nutrition-label">糖分</div>
-        </div>
-        <div class="nutrition-card">
-            <div class="nutrition-value" id="sodiumValue">0mg</div>
-            <div class="nutrition-label">钠</div>
-        </div>
-        <div class="nutrition-card">
-            <div class="nutrition-value" id="calciumValue">0mg</div>
-            <div class="nutrition-label">钙</div>
-        </div>
-    </div>
-    
-    <div class="meal-section">
-        <div class="meal-header">
-            <div class="meal-title">早餐</div>
-            <button class="add-food-btn" data-meal="breakfast">+</button>
-        </div>
-        <div class="food-list" id="breakfast-list">
-            <div class="empty-state">
-                <div class="empty-icon">🥐</div>
-                <div class="empty-text">暂无食物记录</div>
+    <div class="dashboard">
+        <div class="dashboard-title">今日摄入情况</div>
+        
+        <div class="intake-card">
+            <div class="intake-header">
+                <div class="intake-name">奶及奶制品</div>
+                <div class="intake-status status-normal" id="dairyStatus">正常</div>
+            </div>
+            <div class="intake-bar-container">
+                <div class="intake-bar bar-normal" id="dairyBar" style="width: 0%"></div>
+            </div>
+            <div class="intake-info">
+                <div class="intake-current">已摄入: <span id="dairyCurrent">0</span>克</div>
+                <div class="intake-target">目标: 300-500克</div>
             </div>
         </div>
-    </div>
-    
-    <div class="meal-section">
-        <div class="meal-header">
-            <div class="meal-title">午餐</div>
-            <button class="add-food-btn" data-meal="lunch">+</button>
-        </div>
-        <div class="food-list" id="lunch-list">
-            <div class="empty-state">
-                <div class="empty-icon">🍲</div>
-                <div class="empty-text">暂无食物记录</div>
+        
+        <div class="intake-card">
+            <div class="intake-header">
+                <div class="intake-name">动物性食物</div>
+                <div class="intake-status status-normal" id="meatStatus">正常</div>
+            </div>
+            <div class="intake-bar-container">
+                <div class="intake-bar bar-normal" id="meatBar" style="width: 0%"></div>
+            </div>
+            <div class="intake-info">
+                <div class="intake-current">已摄入: <span id="meatCurrent">0</span>克</div>
+                <div class="intake-target">目标: 120-200克</div>
             </div>
         </div>
-    </div>
-    
-    <div class="meal-section">
-        <div class="meal-header">
-            <div class="meal-title">晚餐</div>
-            <button class="add-food-btn" data-meal="dinner">+</button>
-        </div>
-        <div class="food-list" id="dinner-list">
-            <div class="empty-state">
-                <div class="empty-icon">🍽️</div>
-                <div class="empty-text">暂无食物记录</div>
+        
+        <div class="intake-card">
+            <div class="intake-header">
+                <div class="intake-name">水</div>
+                <div class="intake-status status-normal" id="waterStatus">正常</div>
+            </div>
+            <div class="intake-bar-container">
+                <div class="intake-bar bar-normal" id="waterBar" style="width: 0%"></div>
+            </div>
+            <div class="intake-info">
+                <div class="intake-current">已摄入: <span id="waterCurrent">0</span>毫升</div>
+                <div class="intake-target">目标: 1500-1700毫升</div>
             </div>
         </div>
-    </div>
-    
-    <div class="meal-section">
-        <div class="meal-header">
-            <div class="meal-title">零食</div>
-            <button class="add-food-btn" data-meal="snack">+</button>
+        
+        <div class="quick-add-section">
+            <button class="quick-add-btn btn-dairy" data-type="dairy">+ 奶制品</button>
+            <button class="quick-add-btn btn-meat" data-type="meat">+ 动物性食物</button>
+            <button class="quick-add-btn btn-water" data-type="water">+ 水</button>
         </div>
-        <div class="food-list" id="snack-list">
-            <div class="empty-state">
-                <div class="empty-icon">🍎</div>
-                <div class="empty-text">暂无食物记录</div>
+        
+        <div class="history-section">
+            <div class="history-title">今日摄入记录</div>
+            <div class="history-list" id="historyList">
+                <div class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <div class="empty-text">暂无摄入记录</div>
+                </div>
             </div>
         </div>
     </div>
     
     <div class="add-button" id="quickAddBtn">+</div>
     
-    <div class="modal" id="foodModal">
+    <div class="modal" id="intakeModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">添加食物</div>
+                <div class="modal-title" id="modalTitle">添加摄入</div>
                 <button class="close-modal" id="closeModal">×</button>
             </div>
-            <form id="foodForm">
+            <form id="intakeForm">
                 <div class="form-group">
-                    <label class="form-label" for="foodName">食物名称</label>
-                    <input type="text" class="form-input" id="foodName" placeholder="例如：苹果" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="mealType">餐次</label>
-                    <select class="form-select" id="mealType" required>
-                        <option value="breakfast">早餐</option>
-                        <option value="lunch">午餐</option>
-                        <option value="dinner">晚餐</option>
-                        <option value="snack">零食</option>
+                    <label class="form-label" for="intakeType">摄入类型</label>
+                    <select class="form-select" id="intakeType" required>
+                        <option value="dairy">奶及奶制品</option>
+                        <option value="meat">动物性食物</option>
+                        <option value="water">水</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="calories">卡路里 (kcal)</label>
-                    <input type="number" class="form-input" id="calories" placeholder="例如：150" required>
+                    <label class="form-label" for="itemName">食物/饮品名称</label>
+                    <input type="text" class="form-input" id="itemName" placeholder="例如：牛奶" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="protein">蛋白质 (g)</label>
-                    <input type="number" class="form-input" id="protein" placeholder="例如：5" step="0.1">
+                    <label class="form-label" for="amount">摄入量</label>
+                    <input type="number" class="form-input" id="amount" placeholder="例如：250" required>
+                    <span id="unitLabel">克</span>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" for="carbs">碳水化合物 (g)</label>
-                    <input type="number" class="form-input" id="carbs" placeholder="例如：30" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="fat">脂肪 (g)</label>
-                    <input type="number" class="form-input" id="fat" placeholder="例如：2" step="0.1">
-                </div>
-                <button type="submit" class="submit-btn">添加食物</button>
+                <button type="submit" class="submit-btn">记录摄入</button>
             </form>
         </div>
     </div>
@@ -434,116 +462,175 @@
             day: 'numeric'
         });
         
-        // 食物数据存储
-        let foodData = JSON.parse(localStorage.getItem('foodData')) || {
-            breakfast: [],
-            lunch: [],
-            dinner: [],
-            snack: []
+        // 摄入目标标准（根据中国居民平衡膳食宝塔）
+        const intakeTargets = {
+            dairy: { min: 300, max: 500, unit: '克' },
+            meat: { min: 120, max: 200, unit: '克' },
+            water: { min: 1500, max: 1700, unit: '毫升' }
+        };
+        
+        // 摄入数据存储
+        let intakeData = JSON.parse(localStorage.getItem('intakeData')) || {
+            dairy: 0,
+            meat: 0,
+            water: 0,
+            history: []
         };
         
         // 更新UI
         function updateUI() {
-            // 更新各餐次的食物列表
-            updateMealList('breakfast');
-            updateMealList('lunch');
-            updateMealList('dinner');
-            updateMealList('snack');
+            // 更新奶制品摄入
+            updateIntakeDisplay('dairy', intakeData.dairy);
             
-            // 更新营养统计
-            updateNutritionStats();
+            // 更新动物性食物摄入
+            updateIntakeDisplay('meat', intakeData.meat);
+            
+            // 更新水摄入
+            updateIntakeDisplay('water', intakeData.water);
+            
+            // 更新历史记录
+            updateHistoryList();
+            
+            // 检查并显示警报
+            checkAlerts();
             
             // 保存到localStorage
-            localStorage.setItem('foodData', JSON.stringify(foodData));
+            localStorage.setItem('intakeData', JSON.stringify(intakeData));
         }
         
-        // 更新餐次食物列表
-        function updateMealList(mealType) {
-            const mealList = document.getElementById(`${mealType}-list`);
-            const foods = foodData[mealType];
+        // 更新摄入显示
+        function updateIntakeDisplay(type, current) {
+            const target = intakeTargets[type];
+            const percentage = Math.min((current / target.max) * 100, 100);
             
-            if (foods.length === 0) {
-                mealList.innerHTML = `
+            // 更新进度条
+            const bar = document.getElementById(`${type}Bar`);
+            bar.style.width = `${percentage}%`;
+            
+            // 更新当前值
+            document.getElementById(`${type}Current`).textContent = current;
+            
+            // 更新状态
+            const statusElement = document.getElementById(`${type}Status`);
+            
+            if (current < target.min) {
+                statusElement.textContent = '不足';
+                statusElement.className = 'intake-status status-low';
+                bar.className = 'intake-bar bar-low';
+            } else if (current > target.max) {
+                statusElement.textContent = '过量';
+                statusElement.className = 'intake-status status-high';
+                bar.className = 'intake-bar bar-high';
+            } else {
+                statusElement.textContent = '正常';
+                statusElement.className = 'intake-status status-normal';
+                bar.className = 'intake-bar bar-normal';
+            }
+        }
+        
+        // 更新历史记录
+        function updateHistoryList() {
+            const historyList = document.getElementById('historyList');
+            const history = intakeData.history;
+            
+            if (history.length === 0) {
+                historyList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">${getMealIcon(mealType)}</div>
-                        <div class="empty-text">暂无食物记录</div>
+                        <div class="empty-icon">📝</div>
+                        <div class="empty-text">暂无摄入记录</div>
                     </div>
                 `;
                 return;
             }
             
-            mealList.innerHTML = foods.map(food => `
-                <div class="food-item">
-                    <div class="food-name">${food.name}</div>
-                    <div class="food-calories">${food.calories} kcal</div>
+            // 按时间倒序排列
+            const sortedHistory = [...history].reverse();
+            
+            historyList.innerHTML = sortedHistory.map(item => `
+                <div class="history-item">
+                    <div class="history-name">${item.name}</div>
+                    <div class="history-amount">${item.amount}${getUnit(item.type)}</div>
                 </div>
             `).join('');
         }
         
-        // 获取餐次图标
-        function getMealIcon(mealType) {
-            const icons = {
-                breakfast: '🥐',
-                lunch: '🍲',
-                dinner: '🍽️',
-                snack: '🍎'
-            };
-            return icons[mealType] || '🍴';
+        // 获取单位
+        function getUnit(type) {
+            return intakeTargets[type].unit;
         }
         
-        // 更新营养统计
-        function updateNutritionStats() {
-            let totalCalories = 0;
-            let totalProtein = 0;
-            let totalCarbs = 0;
-            let totalFat = 0;
-            let totalFiber = 0;
-            let totalSugar = 0;
-            let totalSodium = 0;
-            let totalCalcium = 0;
+        // 检查并显示警报
+        function checkAlerts() {
+            const alerts = [];
             
-            // 计算所有食物的营养总和
-            Object.values(foodData).forEach(meal => {
-                meal.forEach(food => {
-                    totalCalories += food.calories || 0;
-                    totalProtein += food.protein || 0;
-                    totalCarbs += food.carbs || 0;
-                    totalFat += food.fat || 0;
-                    totalFiber += food.fiber || 0;
-                    totalSugar += food.sugar || 0;
-                    totalSodium += food.sodium || 0;
-                    totalCalcium += food.calcium || 0;
-                });
-            });
+            // 检查奶制品
+            if (intakeData.dairy < intakeTargets.dairy.min) {
+                alerts.push(`奶制品摄入不足，建议摄入${intakeTargets.dairy.min}-${intakeTargets.dairy.max}克`);
+            } else if (intakeData.dairy > intakeTargets.dairy.max) {
+                alerts.push(`奶制品摄入过量，建议摄入${intakeTargets.dairy.min}-${intakeTargets.dairy.max}克`);
+            }
             
-            // 更新UI
-            document.getElementById('totalCalories').textContent = Math.round(totalCalories);
-            document.getElementById('totalProtein').textContent = Math.round(totalProtein) + 'g';
-            document.getElementById('totalCarbs').textContent = Math.round(totalCarbs) + 'g';
-            document.getElementById('totalFat').textContent = Math.round(totalFat) + 'g';
-            document.getElementById('fiberValue').textContent = Math.round(totalFiber) + 'g';
-            document.getElementById('sugarValue').textContent = Math.round(totalSugar) + 'g';
-            document.getElementById('sodiumValue').textContent = Math.round(totalSodium) + 'mg';
-            document.getElementById('calciumValue').textContent = Math.round(totalCalcium) + 'mg';
+            // 检查动物性食物
+            if (intakeData.meat < intakeTargets.meat.min) {
+                alerts.push(`动物性食物摄入不足，建议摄入${intakeTargets.meat.min}-${intakeTargets.meat.max}克`);
+            } else if (intakeData.meat > intakeTargets.meat.max) {
+                alerts.push(`动物性食物摄入过量，建议摄入${intakeTargets.meat.min}-${intakeTargets.meat.max}克`);
+            }
+            
+            // 检查水
+            if (intakeData.water < intakeTargets.water.min) {
+                alerts.push(`水摄入不足，建议摄入${intakeTargets.water.min}-${intakeTargets.water.max}毫升`);
+            } else if (intakeData.water > intakeTargets.water.max) {
+                alerts.push(`水摄入过量，建议摄入${intakeTargets.water.min}-${intakeTargets.water.max}毫升`);
+            }
+            
+            // 显示警报
+            const alertBanner = document.getElementById('alertBanner');
+            if (alerts.length > 0) {
+                alertBanner.innerHTML = alerts.join('<br>');
+                alertBanner.style.display = 'block';
+            } else {
+                alertBanner.style.display = 'none';
+            }
         }
         
         // 模态框控制
-        const modal = document.getElementById('foodModal');
+        const modal = document.getElementById('intakeModal');
         const closeModalBtn = document.getElementById('closeModal');
-        const foodForm = document.getElementById('foodForm');
+        const intakeForm = document.getElementById('intakeForm');
         const quickAddBtn = document.getElementById('quickAddBtn');
-        const addFoodBtns = document.querySelectorAll('.add-food-btn');
+        const quickAddBtns = document.querySelectorAll('.quick-add-btn');
+        const intakeTypeSelect = document.getElementById('intakeType');
+        const unitLabel = document.getElementById('unitLabel');
+        const modalTitle = document.getElementById('modalTitle');
         
         // 打开模态框
-        function openModal(mealType = 'breakfast') {
-            document.getElementById('mealType').value = mealType;
+        function openModal(type = 'dairy') {
+            intakeTypeSelect.value = type;
+            updateUnitLabel(type);
+            updateModalTitle(type);
             modal.style.display = 'flex';
         }
         
         // 关闭模态框
         function closeModal() {
             modal.style.display = 'none';
-            foodForm.reset();
+            intakeForm.reset();
+        }
+        
+        // 更新单位标签
+        function updateUnitLabel(type) {
+            unitLabel.textContent = getUnit(type);
+        }
+        
+        // 更新模态框标题
+        function updateModalTitle(type) {
+            const titles = {
+                dairy: '添加奶制品',
+                meat: '添加动物性食物',
+                water: '添加水'
+            };
+            modalTitle.textContent = titles[type] || '添加摄入';
         }
         
         // 事件监听
@@ -551,11 +638,17 @@
         
         quickAddBtn.addEventListener('click', () => openModal());
         
-        addFoodBtns.forEach(btn => {
+        quickAddBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                const mealType = btn.getAttribute('data-meal');
-                openModal(mealType);
+                const type = btn.getAttribute('data-type');
+                openModal(type);
             });
+        });
+        
+        // 摄入类型改变时更新单位
+        intakeTypeSelect.addEventListener('change', (e) => {
+            updateUnitLabel(e.target.value);
+            updateModalTitle(e.target.value);
         });
         
         // 点击模态框外部关闭
@@ -566,28 +659,20 @@
         });
         
         // 表单提交
-        foodForm.addEventListener('submit', (e) => {
+        intakeForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const foodName = document.getElementById('foodName').value;
-            const mealType = document.getElementById('mealType').value;
-            const calories = parseInt(document.getElementById('calories').value);
-            const protein = parseFloat(document.getElementById('protein').value) || 0;
-            const carbs = parseFloat(document.getElementById('carbs').value) || 0;
-            const fat = parseFloat(document.getElementById('fat').value) || 0;
+            const type = intakeTypeSelect.value;
+            const name = document.getElementById('itemName').value;
+            const amount = parseInt(document.getElementById('amount').value);
             
-            // 添加食物到数据
-            foodData[mealType].push({
-                name: foodName,
-                calories: calories,
-                protein: protein,
-                carbs: carbs,
-                fat: fat,
-                // 以下为模拟数据，实际应用中可以从数据库获取
-                fiber: Math.round(Math.random() * 5),
-                sugar: Math.round(Math.random() * 10),
-                sodium: Math.round(Math.random() * 200),
-                calcium: Math.round(Math.random() * 100)
+            // 添加摄入数据
+            intakeData[type] += amount;
+            intakeData.history.push({
+                type: type,
+                name: name,
+                amount: amount,
+                timestamp: new Date().toISOString()
             });
             
             // 更新UI
@@ -597,48 +682,37 @@
             closeModal();
             
             // 显示添加成功提示
-            alert(`成功添加 ${foodName} 到${getMealName(mealType)}`);
+            alert(`成功记录 ${name}: ${amount}${getUnit(type)}`);
         });
-        
-        // 获取餐次中文名称
-        function getMealName(mealType) {
-            const names = {
-                breakfast: '早餐',
-                lunch: '午餐',
-                dinner: '晚餐',
-                snack: '零食'
-            };
-            return names[mealType] || '未知餐次';
-        }
         
         // 初始化UI
         updateUI();
         
         // 添加示例数据（首次使用时）
-        if (!localStorage.getItem('foodData')) {
-            foodData.breakfast.push({
-                name: '燕麦粥',
-                calories: 150,
-                protein: 5,
-                carbs: 27,
-                fat: 3,
-                fiber: 4,
-                sugar: 1,
-                sodium: 5,
-                calcium: 20
+        if (!localStorage.getItem('intakeData')) {
+            intakeData.history.push({
+                type: 'dairy',
+                name: '牛奶',
+                amount: 200,
+                timestamp: new Date().toISOString()
             });
+            intakeData.dairy += 200;
             
-            foodData.lunch.push({
-                name: '鸡胸肉沙拉',
-                calories: 320,
-                protein: 25,
-                carbs: 12,
-                fat: 18,
-                fiber: 5,
-                sugar: 6,
-                sodium: 450,
-                calcium: 80
+            intakeData.history.push({
+                type: 'meat',
+                name: '鸡胸肉',
+                amount: 100,
+                timestamp: new Date().toISOString()
             });
+            intakeData.meat += 100;
+            
+            intakeData.history.push({
+                type: 'water',
+                name: '饮用水',
+                amount: 500,
+                timestamp: new Date().toISOString()
+            });
+            intakeData.water += 500;
             
             updateUI();
         }
