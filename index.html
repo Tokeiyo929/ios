@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>平衡膳食追踪器</title>
+    <title>健康膳食与步数追踪器</title>
     <style>
         * {
             margin: 0;
@@ -138,6 +138,71 @@
         
         .intake-target {
             font-weight: 500;
+        }
+        
+        .steps-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .steps-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .steps-count {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #4CAF50;
+        }
+        
+        .steps-target {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-bottom: 15px;
+        }
+        
+        .steps-progress {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .steps-progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .steps-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        .steps-button:active {
+            background-color: #2E7D32;
+        }
+        
+        .steps-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
         
         .quick-add-section {
@@ -351,18 +416,102 @@
             font-size: 14px;
             display: none;
         }
+        
+        .permission-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .permission-content {
+            background-color: white;
+            width: 85%;
+            max-width: 320px;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .permission-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .permission-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .permission-text {
+            font-size: 15px;
+            color: #8e8e93;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        
+        .permission-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .permission-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        
+        .permission-deny {
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+        
+        .permission-allow {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .steps-message {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 5px;
+            min-height: 16px;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>平衡膳食追踪器</h1>
+        <h1>健康膳食与步数追踪器</h1>
         <div class="date-display" id="currentDate">2023年11月15日</div>
     </header>
     
     <div class="alert-banner" id="alertBanner"></div>
     
     <div class="dashboard">
-        <div class="dashboard-title">今日摄入情况</div>
+        <div class="dashboard-title">今日健康数据</div>
+        
+        <div class="steps-card">
+            <div class="steps-icon">🚶‍♂️</div>
+            <div class="steps-count" id="stepsCount">--</div>
+            <div class="steps-target">目标: 6000步</div>
+            <div class="steps-progress">
+                <div class="steps-progress-bar" id="stepsProgressBar" style="width: 0%"></div>
+            </div>
+            <div class="steps-message" id="stepsMessage"></div>
+            <button class="steps-button" id="stepsButton">同步健康数据</button>
+        </div>
         
         <div class="intake-card">
             <div class="intake-header">
@@ -453,6 +602,18 @@
             </form>
         </div>
     </div>
+    
+    <div class="permission-modal" id="permissionModal">
+        <div class="permission-content">
+            <div class="permission-icon">🔍</div>
+            <div class="permission-title">访问健康数据</div>
+            <div class="permission-text">为了同步您的步数数据，我们需要访问苹果健康应用中的活动数据。这有助于我们追踪您的每日步数目标完成情况。</div>
+            <div class="permission-buttons">
+                <button class="permission-btn permission-deny" id="denyPermission">不允许</button>
+                <button class="permission-btn permission-allow" id="allowPermission">允许</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // 设置当前日期
@@ -469,6 +630,12 @@
             water: { min: 1500, max: 1700, unit: '毫升' }
         };
         
+        // 步数目标
+        const stepsTarget = 6000;
+        
+        // 健康数据权限状态
+        let healthPermissionGranted = false;
+        
         // 摄入数据存储
         let intakeData = JSON.parse(localStorage.getItem('intakeData')) || {
             dairy: 0,
@@ -476,6 +643,28 @@
             water: 0,
             history: []
         };
+        
+        // 步数数据存储
+        let stepsData = JSON.parse(localStorage.getItem('stepsData')) || {
+            steps: null,
+            lastUpdated: null
+        };
+        
+        // 初始化应用
+        function initApp() {
+            updateUI();
+            
+            // 检查是否需要请求健康数据权限
+            const permissionAsked = localStorage.getItem('healthPermissionAsked');
+            if (!permissionAsked) {
+                setTimeout(() => {
+                    document.getElementById('permissionModal').style.display = 'flex';
+                }, 1000);
+            } else if (permissionAsked === 'granted') {
+                healthPermissionGranted = true;
+                // 不自动获取步数，等待用户手动点击
+            }
+        }
         
         // 更新UI
         function updateUI() {
@@ -488,6 +677,9 @@
             // 更新水摄入
             updateIntakeDisplay('water', intakeData.water);
             
+            // 更新步数显示
+            updateStepsDisplay(stepsData.steps);
+            
             // 更新历史记录
             updateHistoryList();
             
@@ -496,6 +688,7 @@
             
             // 保存到localStorage
             localStorage.setItem('intakeData', JSON.stringify(intakeData));
+            localStorage.setItem('stepsData', JSON.stringify(stepsData));
         }
         
         // 更新摄入显示
@@ -525,6 +718,39 @@
                 statusElement.textContent = '正常';
                 statusElement.className = 'intake-status status-normal';
                 bar.className = 'intake-bar bar-normal';
+            }
+        }
+        
+        // 更新步数显示
+        function updateStepsDisplay(steps) {
+            const stepsCountElement = document.getElementById('stepsCount');
+            const stepsMessageElement = document.getElementById('stepsMessage');
+            
+            if (steps === null) {
+                stepsCountElement.textContent = '--';
+                stepsCountElement.style.color = '#8e8e93';
+                stepsMessageElement.textContent = '尚未获取步数数据';
+                document.getElementById('stepsProgressBar').style.width = '0%';
+            } else {
+                stepsCountElement.textContent = steps;
+                stepsCountElement.style.color = '#4CAF50';
+                
+                const percentage = Math.min((steps / stepsTarget) * 100, 100);
+                document.getElementById('stepsProgressBar').style.width = `${percentage}%`;
+                
+                if (steps < stepsTarget) {
+                    stepsMessageElement.textContent = `还需${stepsTarget - steps}步完成目标`;
+                } else {
+                    stepsMessageElement.textContent = '恭喜！已完成今日步数目标';
+                }
+            }
+            
+            // 更新按钮状态
+            const stepsButton = document.getElementById('stepsButton');
+            if (healthPermissionGranted) {
+                stepsButton.textContent = '更新步数数据';
+            } else {
+                stepsButton.textContent = '请求健康数据权限';
             }
         }
         
@@ -563,6 +789,11 @@
         function checkAlerts() {
             const alerts = [];
             
+            // 检查步数
+            if (stepsData.steps !== null && stepsData.steps < stepsTarget) {
+                alerts.push(`今日步数不足，建议达到${stepsTarget}步`);
+            }
+            
             // 检查奶制品
             if (intakeData.dairy < intakeTargets.dairy.min) {
                 alerts.push(`奶制品摄入不足，建议摄入${intakeTargets.dairy.min}-${intakeTargets.dairy.max}克`);
@@ -594,6 +825,35 @@
             }
         }
         
+        // 模拟从苹果健康获取步数数据
+        function updateStepsFromHealth() {
+            if (!healthPermissionGranted) {
+                alert('请先允许访问健康数据');
+                return;
+            }
+            
+            // 模拟API调用延迟
+            document.getElementById('stepsButton').disabled = true;
+            document.getElementById('stepsButton').textContent = '同步中...';
+            document.getElementById('stepsMessage').textContent = '正在从健康应用获取数据...';
+            
+            setTimeout(() => {
+                // 在实际应用中，这里会调用HealthKit API
+                // 由于这是一个网页应用，无法直接访问苹果健康数据
+                // 这里模拟无法获取数据的情况
+                
+                stepsData.steps = null;
+                stepsData.lastUpdated = new Date().toISOString();
+                
+                updateUI();
+                
+                document.getElementById('stepsButton').disabled = false;
+                
+                // 显示更新结果
+                alert('无法从健康应用获取步数数据。请确保：\n1. 您已授予健康数据访问权限\n2. 您的设备支持健康数据追踪\n3. 您已在健康应用中记录步数数据');
+            }, 1500);
+        }
+        
         // 模态框控制
         const modal = document.getElementById('intakeModal');
         const closeModalBtn = document.getElementById('closeModal');
@@ -604,16 +864,24 @@
         const unitLabel = document.getElementById('unitLabel');
         const modalTitle = document.getElementById('modalTitle');
         
-        // 打开模态框
-        function openModal(type = 'dairy') {
+        // 权限模态框控制
+        const permissionModal = document.getElementById('permissionModal');
+        const denyPermissionBtn = document.getElementById('denyPermission');
+        const allowPermissionBtn = document.getElementById('allowPermission');
+        
+        // 步数按钮
+        const stepsButton = document.getElementById('stepsButton');
+        
+        // 打开摄入模态框
+        function openIntakeModal(type = 'dairy') {
             intakeTypeSelect.value = type;
             updateUnitLabel(type);
             updateModalTitle(type);
             modal.style.display = 'flex';
         }
         
-        // 关闭模态框
-        function closeModal() {
+        // 关闭摄入模态框
+        function closeIntakeModal() {
             modal.style.display = 'none';
             intakeForm.reset();
         }
@@ -634,14 +902,14 @@
         }
         
         // 事件监听
-        closeModalBtn.addEventListener('click', closeModal);
+        closeModalBtn.addEventListener('click', closeIntakeModal);
         
-        quickAddBtn.addEventListener('click', () => openModal());
+        quickAddBtn.addEventListener('click', () => openIntakeModal());
         
         quickAddBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const type = btn.getAttribute('data-type');
-                openModal(type);
+                openIntakeModal(type);
             });
         });
         
@@ -654,11 +922,14 @@
         // 点击模态框外部关闭
         window.addEventListener('click', (e) => {
             if (e.target === modal) {
-                closeModal();
+                closeIntakeModal();
+            }
+            if (e.target === permissionModal) {
+                permissionModal.style.display = 'none';
             }
         });
         
-        // 表单提交
+        // 摄入表单提交
         intakeForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -679,43 +950,37 @@
             updateUI();
             
             // 关闭模态框
-            closeModal();
+            closeIntakeModal();
             
             // 显示添加成功提示
             alert(`成功记录 ${name}: ${amount}${getUnit(type)}`);
         });
         
-        // 初始化UI
-        updateUI();
+        // 权限请求处理
+        denyPermissionBtn.addEventListener('click', () => {
+            permissionModal.style.display = 'none';
+            localStorage.setItem('healthPermissionAsked', 'denied');
+            alert('您可以在设置中随时授予健康数据访问权限');
+        });
         
-        // 添加示例数据（首次使用时）
-        if (!localStorage.getItem('intakeData')) {
-            intakeData.history.push({
-                type: 'dairy',
-                name: '牛奶',
-                amount: 200,
-                timestamp: new Date().toISOString()
-            });
-            intakeData.dairy += 200;
-            
-            intakeData.history.push({
-                type: 'meat',
-                name: '鸡胸肉',
-                amount: 100,
-                timestamp: new Date().toISOString()
-            });
-            intakeData.meat += 100;
-            
-            intakeData.history.push({
-                type: 'water',
-                name: '饮用水',
-                amount: 500,
-                timestamp: new Date().toISOString()
-            });
-            intakeData.water += 500;
-            
-            updateUI();
-        }
+        allowPermissionBtn.addEventListener('click', () => {
+            permissionModal.style.display = 'none';
+            localStorage.setItem('healthPermissionAsked', 'granted');
+            healthPermissionGranted = true;
+            updateStepsFromHealth();
+        });
+        
+        // 步数按钮点击事件
+        stepsButton.addEventListener('click', () => {
+            if (healthPermissionGranted) {
+                updateStepsFromHealth();
+            } else {
+                permissionModal.style.display = 'flex';
+            }
+        });
+        
+        // 初始化应用
+        initApp();
     </script>
 </body>
 </html>
