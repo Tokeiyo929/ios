@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>营养摄入追踪器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            max-width: 414px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 80px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .date-display {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: white;
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4CAF50;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 4px;
+        }
+        
+        .meal-section {
+            margin: 15px;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .meal-header {
+            padding: 12px 15px;
+            background-color: #f8f8f8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e5e7;
+        }
+        
+        .meal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .add-food-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        .food-list {
+            padding: 10px 0;
+        }
+        
+        .food-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .food-item:last-child {
+            border-bottom: none;
+        }
+        
+        .food-name {
+            font-size: 16px;
+        }
+        
+        .food-calories {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+        
+        .nutrition-cards {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0 10px;
+            margin-bottom: 15px;
+        }
+        
+        .nutrition-card {
+            width: calc(50% - 20px);
+            margin: 10px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .nutrition-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .nutrition-label {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        
+        .add-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+        
+        .add-button:active {
+            transform: scale(0.95);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 350px;
+            border-radius: 16px;
+            padding: 20px;
+            animation: modalAppear 0.3s ease-out;
+        }
+        
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #8e8e93;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #1d1d1f;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e5e7;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e5e7;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: white;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: #8e8e93;
+        }
+        
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        .empty-text {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>营养摄入追踪器</h1>
+        <div class="date-display" id="currentDate">2023年11月15日</div>
+    </header>
+    
+    <div class="stats-container">
+        <div class="stat-item">
+            <div class="stat-value" id="totalCalories">0</div>
+            <div class="stat-label">卡路里</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="totalProtein">0g</div>
+            <div class="stat-label">蛋白质</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="totalCarbs">0g</div>
+            <div class="stat-label">碳水</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="totalFat">0g</div>
+            <div class="stat-label">脂肪</div>
+        </div>
+    </div>
+    
+    <div class="nutrition-cards">
+        <div class="nutrition-card">
+            <div class="nutrition-value" id="fiberValue">0g</div>
+            <div class="nutrition-label">膳食纤维</div>
+        </div>
+        <div class="nutrition-card">
+            <div class="nutrition-value" id="sugarValue">0g</div>
+            <div class="nutrition-label">糖分</div>
+        </div>
+        <div class="nutrition-card">
+            <div class="nutrition-value" id="sodiumValue">0mg</div>
+            <div class="nutrition-label">钠</div>
+        </div>
+        <div class="nutrition-card">
+            <div class="nutrition-value" id="calciumValue">0mg</div>
+            <div class="nutrition-label">钙</div>
+        </div>
+    </div>
+    
+    <div class="meal-section">
+        <div class="meal-header">
+            <div class="meal-title">早餐</div>
+            <button class="add-food-btn" data-meal="breakfast">+</button>
+        </div>
+        <div class="food-list" id="breakfast-list">
+            <div class="empty-state">
+                <div class="empty-icon">🥐</div>
+                <div class="empty-text">暂无食物记录</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="meal-section">
+        <div class="meal-header">
+            <div class="meal-title">午餐</div>
+            <button class="add-food-btn" data-meal="lunch">+</button>
+        </div>
+        <div class="food-list" id="lunch-list">
+            <div class="empty-state">
+                <div class="empty-icon">🍲</div>
+                <div class="empty-text">暂无食物记录</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="meal-section">
+        <div class="meal-header">
+            <div class="meal-title">晚餐</div>
+            <button class="add-food-btn" data-meal="dinner">+</button>
+        </div>
+        <div class="food-list" id="dinner-list">
+            <div class="empty-state">
+                <div class="empty-icon">🍽️</div>
+                <div class="empty-text">暂无食物记录</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="meal-section">
+        <div class="meal-header">
+            <div class="meal-title">零食</div>
+            <button class="add-food-btn" data-meal="snack">+</button>
+        </div>
+        <div class="food-list" id="snack-list">
+            <div class="empty-state">
+                <div class="empty-icon">🍎</div>
+                <div class="empty-text">暂无食物记录</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="add-button" id="quickAddBtn">+</div>
+    
+    <div class="modal" id="foodModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">添加食物</div>
+                <button class="close-modal" id="closeModal">×</button>
+            </div>
+            <form id="foodForm">
+                <div class="form-group">
+                    <label class="form-label" for="foodName">食物名称</label>
+                    <input type="text" class="form-input" id="foodName" placeholder="例如：苹果" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="mealType">餐次</label>
+                    <select class="form-select" id="mealType" required>
+                        <option value="breakfast">早餐</option>
+                        <option value="lunch">午餐</option>
+                        <option value="dinner">晚餐</option>
+                        <option value="snack">零食</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="calories">卡路里 (kcal)</label>
+                    <input type="number" class="form-input" id="calories" placeholder="例如：150" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="protein">蛋白质 (g)</label>
+                    <input type="number" class="form-input" id="protein" placeholder="例如：5" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="carbs">碳水化合物 (g)</label>
+                    <input type="number" class="form-input" id="carbs" placeholder="例如：30" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="fat">脂肪 (g)</label>
+                    <input type="number" class="form-input" id="fat" placeholder="例如：2" step="0.1">
+                </div>
+                <button type="submit" class="submit-btn">添加食物</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 设置当前日期
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // 食物数据存储
+        let foodData = JSON.parse(localStorage.getItem('foodData')) || {
+            breakfast: [],
+            lunch: [],
+            dinner: [],
+            snack: []
+        };
+        
+        // 更新UI
+        function updateUI() {
+            // 更新各餐次的食物列表
+            updateMealList('breakfast');
+            updateMealList('lunch');
+            updateMealList('dinner');
+            updateMealList('snack');
+            
+            // 更新营养统计
+            updateNutritionStats();
+            
+            // 保存到localStorage
+            localStorage.setItem('foodData', JSON.stringify(foodData));
+        }
+        
+        // 更新餐次食物列表
+        function updateMealList(mealType) {
+            const mealList = document.getElementById(`${mealType}-list`);
+            const foods = foodData[mealType];
+            
+            if (foods.length === 0) {
+                mealList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">${getMealIcon(mealType)}</div>
+                        <div class="empty-text">暂无食物记录</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            mealList.innerHTML = foods.map(food => `
+                <div class="food-item">
+                    <div class="food-name">${food.name}</div>
+                    <div class="food-calories">${food.calories} kcal</div>
+                </div>
+            `).join('');
+        }
+        
+        // 获取餐次图标
+        function getMealIcon(mealType) {
+            const icons = {
+                breakfast: '🥐',
+                lunch: '🍲',
+                dinner: '🍽️',
+                snack: '🍎'
+            };
+            return icons[mealType] || '🍴';
+        }
+        
+        // 更新营养统计
+        function updateNutritionStats() {
+            let totalCalories = 0;
+            let totalProtein = 0;
+            let totalCarbs = 0;
+            let totalFat = 0;
+            let totalFiber = 0;
+            let totalSugar = 0;
+            let totalSodium = 0;
+            let totalCalcium = 0;
+            
+            // 计算所有食物的营养总和
+            Object.values(foodData).forEach(meal => {
+                meal.forEach(food => {
+                    totalCalories += food.calories || 0;
+                    totalProtein += food.protein || 0;
+                    totalCarbs += food.carbs || 0;
+                    totalFat += food.fat || 0;
+                    totalFiber += food.fiber || 0;
+                    totalSugar += food.sugar || 0;
+                    totalSodium += food.sodium || 0;
+                    totalCalcium += food.calcium || 0;
+                });
+            });
+            
+            // 更新UI
+            document.getElementById('totalCalories').textContent = Math.round(totalCalories);
+            document.getElementById('totalProtein').textContent = Math.round(totalProtein) + 'g';
+            document.getElementById('totalCarbs').textContent = Math.round(totalCarbs) + 'g';
+            document.getElementById('totalFat').textContent = Math.round(totalFat) + 'g';
+            document.getElementById('fiberValue').textContent = Math.round(totalFiber) + 'g';
+            document.getElementById('sugarValue').textContent = Math.round(totalSugar) + 'g';
+            document.getElementById('sodiumValue').textContent = Math.round(totalSodium) + 'mg';
+            document.getElementById('calciumValue').textContent = Math.round(totalCalcium) + 'mg';
+        }
+        
+        // 模态框控制
+        const modal = document.getElementById('foodModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const foodForm = document.getElementById('foodForm');
+        const quickAddBtn = document.getElementById('quickAddBtn');
+        const addFoodBtns = document.querySelectorAll('.add-food-btn');
+        
+        // 打开模态框
+        function openModal(mealType = 'breakfast') {
+            document.getElementById('mealType').value = mealType;
+            modal.style.display = 'flex';
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            modal.style.display = 'none';
+            foodForm.reset();
+        }
+        
+        // 事件监听
+        closeModalBtn.addEventListener('click', closeModal);
+        
+        quickAddBtn.addEventListener('click', () => openModal());
+        
+        addFoodBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mealType = btn.getAttribute('data-meal');
+                openModal(mealType);
+            });
+        });
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+        
+        // 表单提交
+        foodForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const foodName = document.getElementById('foodName').value;
+            const mealType = document.getElementById('mealType').value;
+            const calories = parseInt(document.getElementById('calories').value);
+            const protein = parseFloat(document.getElementById('protein').value) || 0;
+            const carbs = parseFloat(document.getElementById('carbs').value) || 0;
+            const fat = parseFloat(document.getElementById('fat').value) || 0;
+            
+            // 添加食物到数据
+            foodData[mealType].push({
+                name: foodName,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                // 以下为模拟数据，实际应用中可以从数据库获取
+                fiber: Math.round(Math.random() * 5),
+                sugar: Math.round(Math.random() * 10),
+                sodium: Math.round(Math.random() * 200),
+                calcium: Math.round(Math.random() * 100)
+            });
+            
+            // 更新UI
+            updateUI();
+            
+            // 关闭模态框
+            closeModal();
+            
+            // 显示添加成功提示
+            alert(`成功添加 ${foodName} 到${getMealName(mealType)}`);
+        });
+        
+        // 获取餐次中文名称
+        function getMealName(mealType) {
+            const names = {
+                breakfast: '早餐',
+                lunch: '午餐',
+                dinner: '晚餐',
+                snack: '零食'
+            };
+            return names[mealType] || '未知餐次';
+        }
+        
+        // 初始化UI
+        updateUI();
+        
+        // 添加示例数据（首次使用时）
+        if (!localStorage.getItem('foodData')) {
+            foodData.breakfast.push({
+                name: '燕麦粥',
+                calories: 150,
+                protein: 5,
+                carbs: 27,
+                fat: 3,
+                fiber: 4,
+                sugar: 1,
+                sodium: 5,
+                calcium: 20
+            });
+            
+            foodData.lunch.push({
+                name: '鸡胸肉沙拉',
+                calories: 320,
+                protein: 25,
+                carbs: 12,
+                fat: 18,
+                fiber: 5,
+                sugar: 6,
+                sodium: 450,
+                calcium: 80
+            });
+            
+            updateUI();
+        }
+    </script>
+</body>
+</html>
