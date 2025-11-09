@@ -125,55 +125,104 @@
             color: #2e7d32;
         }
         
-        .status-low {
+        .status-warning {
             background-color: #fff3e0;
             color: #ef6c00;
         }
         
-        .status-high {
+        .status-danger {
             background-color: #ffebee;
             color: #c62828;
         }
         
-        .intake-bar-container {
-            height: 8px;
-            background-color: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
+        .quota-container {
             margin: 10px 0;
         }
         
-        .intake-bar {
+        .quota-bar {
+            height: 12px;
+            background-color: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 5px;
+            position: relative;
+        }
+        
+        .quota-progress {
             height: 100%;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: width 0.5s ease;
+            position: absolute;
+            right: 0;
+            top: 0;
         }
         
         .bar-normal {
             background-color: #4CAF50;
         }
         
-        .bar-low {
+        .bar-warning {
             background-color: #ff9800;
         }
         
-        .bar-high {
+        .bar-danger {
             background-color: #f44336;
         }
         
-        .intake-info {
+        .quota-min-marker {
+            position: absolute;
+            height: 16px;
+            width: 3px;
+            background-color: #666;
+            top: -2px;
+            z-index: 2;
+        }
+        
+        .quota-info {
             display: flex;
             justify-content: space-between;
             font-size: 12px;
             color: #8e8e93;
         }
         
-        .intake-current {
+        .quota-remaining {
             font-weight: 600;
             color: #1d1d1f;
         }
         
-        .intake-target {
+        .quota-target {
+            font-weight: 500;
+        }
+        
+        .special-requirements {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .requirement-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .requirement-item:last-child {
+            border-bottom: none;
+        }
+        
+        .requirement-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .requirement-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
             font-weight: 500;
         }
         
@@ -181,11 +230,12 @@
             display: flex;
             justify-content: space-between;
             margin: 20px 0;
+            flex-wrap: wrap;
         }
         
         .quick-add-btn {
             flex: 1;
-            margin: 0 5px;
+            margin: 5px;
             padding: 12px 0;
             background-color: white;
             border: none;
@@ -195,6 +245,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             cursor: pointer;
             transition: transform 0.2s;
+            min-width: calc(33.333% - 10px);
         }
         
         .quick-add-btn:active {
@@ -211,6 +262,14 @@
         
         .btn-water {
             color: #03A9F4;
+        }
+        
+        .btn-vegetable {
+            color: #4CAF50;
+        }
+        
+        .btn-fruit {
+            color: #FF9800;
         }
         
         .history-section {
@@ -435,12 +494,15 @@
                 <div class="intake-name">奶及奶制品</div>
                 <div class="intake-status status-normal" id="dairyStatus">正常</div>
             </div>
-            <div class="intake-bar-container">
-                <div class="intake-bar bar-normal" id="dairyBar" style="width: 0%"></div>
-            </div>
-            <div class="intake-info">
-                <div class="intake-current">已摄入: <span id="dairyCurrent">0</span>克</div>
-                <div class="intake-target">目标: 300-500克</div>
+            <div class="quota-container">
+                <div class="quota-bar">
+                    <div class="quota-progress bar-normal" id="dairyBar" style="width: 100%"></div>
+                    <div class="quota-min-marker" id="dairyMinMarker" style="left: 40%"></div>
+                </div>
+                <div class="quota-info">
+                    <div class="quota-remaining">剩余额度: <span id="dairyRemaining">300</span>克</div>
+                    <div class="quota-target">目标: 300-500克</div>
+                </div>
             </div>
         </div>
         
@@ -449,12 +511,49 @@
                 <div class="intake-name">动物性食物</div>
                 <div class="intake-status status-normal" id="meatStatus">正常</div>
             </div>
-            <div class="intake-bar-container">
-                <div class="intake-bar bar-normal" id="meatBar" style="width: 0%"></div>
+            <div class="quota-container">
+                <div class="quota-bar">
+                    <div class="quota-progress bar-normal" id="meatBar" style="width: 100%"></div>
+                    <div class="quota-min-marker" id="meatMinMarker" style="left: 40%"></div>
+                </div>
+                <div class="quota-info">
+                    <div class="quota-remaining">剩余额度: <span id="meatRemaining">120</span>克</div>
+                    <div class="quota-target">目标: 120-200克</div>
+                </div>
             </div>
-            <div class="intake-info">
-                <div class="intake-current">已摄入: <span id="meatCurrent">0</span>克</div>
-                <div class="intake-target">目标: 120-200克</div>
+        </div>
+        
+        <div class="intake-card">
+            <div class="intake-header">
+                <div class="intake-name">蔬菜类</div>
+                <div class="intake-status status-normal" id="vegetableStatus">正常</div>
+            </div>
+            <div class="quota-container">
+                <div class="quota-bar">
+                    <div class="quota-progress bar-normal" id="vegetableBar" style="width: 100%"></div>
+                    <div class="quota-min-marker" id="vegetableMinMarker" style="left: 40%"></div>
+                </div>
+                <div class="quota-info">
+                    <div class="quota-remaining">剩余额度: <span id="vegetableRemaining">300</span>克</div>
+                    <div class="quota-target">目标: 300-500克</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="intake-card">
+            <div class="intake-header">
+                <div class="intake-name">水果类</div>
+                <div class="intake-status status-normal" id="fruitStatus">正常</div>
+            </div>
+            <div class="quota-container">
+                <div class="quota-bar">
+                    <div class="quota-progress bar-normal" id="fruitBar" style="width: 100%"></div>
+                    <div class="quota-min-marker" id="fruitMinMarker" style="left: 43%"></div>
+                </div>
+                <div class="quota-info">
+                    <div class="quota-remaining">剩余额度: <span id="fruitRemaining">200</span>克</div>
+                    <div class="quota-target">目标: 200-350克</div>
+                </div>
             </div>
         </div>
         
@@ -463,18 +562,34 @@
                 <div class="intake-name">水</div>
                 <div class="intake-status status-normal" id="waterStatus">正常</div>
             </div>
-            <div class="intake-bar-container">
-                <div class="intake-bar bar-normal" id="waterBar" style="width: 0%"></div>
+            <div class="quota-container">
+                <div class="quota-bar">
+                    <div class="quota-progress bar-normal" id="waterBar" style="width: 100%"></div>
+                    <div class="quota-min-marker" id="waterMinMarker" style="left: 12%"></div>
+                </div>
+                <div class="quota-info">
+                    <div class="quota-remaining">剩余额度: <span id="waterRemaining">1500</span>毫升</div>
+                    <div class="quota-target">目标: 1500-1700毫升</div>
+                </div>
             </div>
-            <div class="intake-info">
-                <div class="intake-current">已摄入: <span id="waterCurrent">0</span>毫升</div>
-                <div class="intake-target">目标: 1500-1700毫升</div>
+        </div>
+        
+        <div class="special-requirements">
+            <div class="requirement-item">
+                <div class="requirement-name">鸡蛋摄入</div>
+                <div class="requirement-status status-normal" id="eggStatus">已完成</div>
+            </div>
+            <div class="requirement-item">
+                <div class="requirement-name">水产品摄入</div>
+                <div class="requirement-status status-normal" id="seafoodStatus">本周已2天</div>
             </div>
         </div>
         
         <div class="quick-add-section">
             <button class="quick-add-btn btn-dairy" data-type="dairy">+ 奶制品</button>
             <button class="quick-add-btn btn-meat" data-type="meat">+ 动物性食物</button>
+            <button class="quick-add-btn btn-vegetable" data-type="vegetable">+ 蔬菜类</button>
+            <button class="quick-add-btn btn-fruit" data-type="fruit">+ 水果类</button>
             <button class="quick-add-btn btn-water" data-type="water">+ 水</button>
         </div>
         
@@ -503,6 +618,8 @@
                     <select class="form-select" id="intakeType" required>
                         <option value="dairy">奶及奶制品</option>
                         <option value="meat">动物性食物</option>
+                        <option value="vegetable">蔬菜类</option>
+                        <option value="fruit">水果类</option>
                         <option value="water">水</option>
                     </select>
                 </div>
@@ -535,7 +652,15 @@
         const intakeTargets = {
             dairy: { min: 300, max: 500, unit: '克' },
             meat: { min: 120, max: 200, unit: '克' },
+            vegetable: { min: 300, max: 500, unit: '克' },
+            fruit: { min: 200, max: 350, unit: '克' },
             water: { min: 1500, max: 1700, unit: '毫升' }
+        };
+        
+        // 特殊要求
+        const specialRequirements = {
+            egg: { daily: true, target: 1, unit: '个' },
+            seafood: { weekly: true, target: 2, unit: '天' }
         };
         
         // 全局变量
@@ -606,11 +731,61 @@
                 intakeData[dateKey] = {
                     dairy: 0,
                     meat: 0,
+                    vegetable: 0,
+                    fruit: 0,
                     water: 0,
+                    egg: false, // 是否吃了鸡蛋
+                    seafood: false, // 是否吃了水产品
                     history: []
                 };
             }
             return intakeData[dateKey];
+        }
+        
+        // 计算剩余额度
+        function calculateRemainingQuota(type, consumed) {
+            const target = intakeTargets[type];
+            
+            // 如果消耗量小于最大值，剩余额度 = 最大值 - 消耗量
+            if (consumed <= target.max) {
+                return target.max - consumed;
+            }
+            // 如果消耗量超过最大值，剩余额度为0
+            else {
+                return 0;
+            }
+        }
+        
+        // 计算进度条百分比（血条式：从右向左减少）
+        function calculateProgressPercentage(type, consumed) {
+            const target = intakeTargets[type];
+            
+            // 计算已使用的百分比，然后从100%中减去
+            if (consumed <= target.max) {
+                return 100 - (consumed / target.max) * 100;
+            }
+            // 如果消耗量超过最大值，进度条为0%
+            else {
+                return 0;
+            }
+        }
+        
+        // 获取状态
+        function getQuotaStatus(type, consumed) {
+            const target = intakeTargets[type];
+            
+            if (consumed <= target.min) {
+                return { status: 'normal', text: '正常' };
+            } else if (consumed <= target.max) {
+                return { status: 'warning', text: '注意' };
+            } else {
+                return { status: 'danger', text: '超量' };
+            }
+        }
+        
+        // 获取进度条颜色类
+        function getProgressBarClass(status) {
+            return `bar-${status}`;
         }
         
         // 更新UI
@@ -618,13 +793,22 @@
             const dateData = getCurrentDateData();
             
             // 更新奶制品摄入
-            updateIntakeDisplay('dairy', dateData.dairy);
+            updateQuotaDisplay('dairy', dateData.dairy);
             
             // 更新动物性食物摄入
-            updateIntakeDisplay('meat', dateData.meat);
+            updateQuotaDisplay('meat', dateData.meat);
+            
+            // 更新蔬菜类摄入
+            updateQuotaDisplay('vegetable', dateData.vegetable);
+            
+            // 更新水果类摄入
+            updateQuotaDisplay('fruit', dateData.fruit);
             
             // 更新水摄入
-            updateIntakeDisplay('water', dateData.water);
+            updateQuotaDisplay('water', dateData.water);
+            
+            // 更新特殊要求状态
+            updateSpecialRequirements();
             
             // 更新历史记录
             updateHistoryList(dateData.history);
@@ -639,42 +823,79 @@
             localStorage.setItem('intakeData', JSON.stringify(intakeData));
         }
         
+        // 更新配额显示
+        function updateQuotaDisplay(type, consumed) {
+            const target = intakeTargets[type];
+            const remaining = calculateRemainingQuota(type, consumed);
+            const percentage = calculateProgressPercentage(type, consumed);
+            const status = getQuotaStatus(type, consumed);
+            
+            // 更新进度条
+            const bar = document.getElementById(`${type}Bar`);
+            bar.style.width = `${percentage}%`;
+            bar.className = `quota-progress ${getProgressBarClass(status.status)}`;
+            
+            // 更新剩余额度显示
+            document.getElementById(`${type}Remaining`).textContent = remaining;
+            
+            // 更新状态
+            const statusElement = document.getElementById(`${type}Status`);
+            statusElement.textContent = status.text;
+            statusElement.className = `intake-status status-${status.status}`;
+            
+            // 更新最小值标记位置（从右向左计算）
+            const minMarker = document.getElementById(`${type}MinMarker`);
+            const minPercentage = (target.min / target.max) * 100;
+            minMarker.style.left = `${minPercentage}%`;
+        }
+        
+        // 更新特殊要求状态
+        function updateSpecialRequirements() {
+            const dateData = getCurrentDateData();
+            
+            // 更新鸡蛋状态
+            const eggStatus = document.getElementById('eggStatus');
+            if (dateData.egg) {
+                eggStatus.textContent = '已完成';
+                eggStatus.className = 'requirement-status status-normal';
+            } else {
+                eggStatus.textContent = '未完成';
+                eggStatus.className = 'requirement-status status-warning';
+            }
+            
+            // 更新水产品状态
+            const seafoodStatus = document.getElementById('seafoodStatus');
+            const seafoodDays = getSeafoodDaysThisWeek();
+            if (seafoodDays >= specialRequirements.seafood.target) {
+                seafoodStatus.textContent = `本周已${seafoodDays}天`;
+                seafoodStatus.className = 'requirement-status status-normal';
+            } else {
+                seafoodStatus.textContent = `本周已${seafoodDays}天`;
+                seafoodStatus.className = 'requirement-status status-warning';
+            }
+        }
+        
+        // 获取本周已摄入水产品的天数
+        function getSeafoodDaysThisWeek() {
+            const weekDates = getWeekDates();
+            let seafoodDays = 0;
+            
+            weekDates.forEach(date => {
+                const dateKey = getDateKey(date);
+                if (intakeData[dateKey] && intakeData[dateKey].seafood) {
+                    seafoodDays++;
+                }
+            });
+            
+            return seafoodDays;
+        }
+        
         // 更新仪表板标题
         function updateDashboardTitle() {
             const today = new Date();
             const isToday = selectedDate.toDateString() === today.toDateString();
             const title = isToday ? '今日摄入情况' : `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日摄入情况`;
             document.getElementById('dashboardTitle').textContent = title;
-        }
-        
-        // 更新摄入显示
-        function updateIntakeDisplay(type, current) {
-            const target = intakeTargets[type];
-            const percentage = Math.min((current / target.max) * 100, 100);
-            
-            // 更新进度条
-            const bar = document.getElementById(`${type}Bar`);
-            bar.style.width = `${percentage}%`;
-            
-            // 更新当前值
-            document.getElementById(`${type}Current`).textContent = current;
-            
-            // 更新状态
-            const statusElement = document.getElementById(`${type}Status`);
-            
-            if (current < target.min) {
-                statusElement.textContent = '不足';
-                statusElement.className = 'intake-status status-low';
-                bar.className = 'intake-bar bar-low';
-            } else if (current > target.max) {
-                statusElement.textContent = '过量';
-                statusElement.className = 'intake-status status-high';
-                bar.className = 'intake-bar bar-high';
-            } else {
-                statusElement.textContent = '正常';
-                statusElement.className = 'intake-status status-normal';
-                bar.className = 'intake-bar bar-normal';
-            }
         }
         
         // 更新历史记录
@@ -727,6 +948,13 @@
             // 从总量中减去
             dateData[item.type] -= item.amount;
             
+            // 如果删除的是鸡蛋或水产品，更新特殊要求状态
+            if (item.category === '鸡蛋') {
+                dateData.egg = false;
+            } else if (item.category === '水产品') {
+                dateData.seafood = false;
+            }
+            
             // 从历史记录中删除
             dateData.history.splice(index, 1);
             
@@ -743,25 +971,22 @@
         function checkAlerts(dateData) {
             const alerts = [];
             
-            // 检查奶制品
-            if (dateData.dairy < intakeTargets.dairy.min) {
-                alerts.push(`奶制品摄入不足，建议摄入${intakeTargets.dairy.min}-${intakeTargets.dairy.max}克`);
-            } else if (dateData.dairy > intakeTargets.dairy.max) {
-                alerts.push(`奶制品摄入过量，建议摄入${intakeTargets.dairy.min}-${intakeTargets.dairy.max}克`);
+            // 检查是否超过最大值
+            Object.keys(intakeTargets).forEach(type => {
+                if (dateData[type] > intakeTargets[type].max) {
+                    alerts.push(`${getTypeName(type)}已超过最大推荐量${intakeTargets[type].max}${intakeTargets[type].unit}`);
+                }
+            });
+            
+            // 检查鸡蛋
+            if (!dateData.egg) {
+                alerts.push(`今日尚未摄入鸡蛋，建议每天吃一个鸡蛋`);
             }
             
-            // 检查动物性食物
-            if (dateData.meat < intakeTargets.meat.min) {
-                alerts.push(`动物性食物摄入不足，建议摄入${intakeTargets.meat.min}-${intakeTargets.meat.max}克`);
-            } else if (dateData.meat > intakeTargets.meat.max) {
-                alerts.push(`动物性食物摄入过量，建议摄入${intakeTargets.meat.min}-${intakeTargets.meat.max}克`);
-            }
-            
-            // 检查水
-            if (dateData.water < intakeTargets.water.min) {
-                alerts.push(`水摄入不足，建议摄入${intakeTargets.water.min}-${intakeTargets.water.max}毫升`);
-            } else if (dateData.water > intakeTargets.water.max) {
-                alerts.push(`水摄入过量，建议摄入${intakeTargets.water.min}-${intakeTargets.water.max}毫升`);
+            // 检查水产品
+            const seafoodDays = getSeafoodDaysThisWeek();
+            if (seafoodDays < specialRequirements.seafood.target) {
+                alerts.push(`本周水产品摄入不足，建议每周吃${specialRequirements.seafood.target}天水产品`);
             }
             
             // 显示警报
@@ -772,6 +997,18 @@
             } else {
                 alertBanner.style.display = 'none';
             }
+        }
+        
+        // 获取类型名称
+        function getTypeName(type) {
+            const names = {
+                dairy: '奶制品',
+                meat: '动物性食物',
+                vegetable: '蔬菜类',
+                fruit: '水果类',
+                water: '水'
+            };
+            return names[type] || type;
         }
         
         // 模态框控制
@@ -820,6 +1057,8 @@
             const titles = {
                 dairy: '添加奶制品',
                 meat: '添加动物性食物',
+                vegetable: '添加蔬菜类',
+                fruit: '添加水果类',
                 water: '添加水'
             };
             modalTitle.textContent = titles[type] || '添加摄入';
@@ -878,6 +1117,13 @@
                 timestamp: new Date().toISOString()
             });
             
+            // 更新特殊要求状态
+            if (category === '鸡蛋') {
+                dateData.egg = true;
+            } else if (category === '水产品') {
+                dateData.seafood = true;
+            }
+            
             // 更新UI
             updateUI();
             
@@ -900,32 +1146,14 @@
         if (Object.keys(intakeData).length === 0) {
             const todayKey = getDateKey(new Date());
             intakeData[todayKey] = {
-                dairy: 200,
-                meat: 100,
-                water: 500,
-                history: [
-                    {
-                        type: 'dairy',
-                        name: '牛奶',
-                        amount: 200,
-                        category: null,
-                        timestamp: new Date().toISOString()
-                    },
-                    {
-                        type: 'meat',
-                        name: '鸡胸肉',
-                        amount: 100,
-                        category: '其他',
-                        timestamp: new Date().toISOString()
-                    },
-                    {
-                        type: 'water',
-                        name: '饮用水',
-                        amount: 500,
-                        category: null,
-                        timestamp: new Date().toISOString()
-                    }
-                ]
+                dairy: 0,
+                meat: 0,
+                vegetable: 0,
+                fruit: 0,
+                water: 0,
+                egg: false,
+                seafood: false,
+                history: []
             };
             
             updateUI();
