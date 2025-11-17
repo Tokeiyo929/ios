@@ -18,20 +18,6 @@ let selectedDate = new Date(); // 当前选中的日期
 let intakeData = JSON.parse(localStorage.getItem('intakeData')) || {};
 let lastUpdateTime = parseInt(localStorage.getItem('lastUpdateTime')) || Date.now();
 
-// 初始化累积额度数据
-function initializeAccumulatedData(dateData) {
-    if (!dateData.accumulated) {
-        dateData.accumulated = {
-            dairy: 0,
-            meat: 0,
-            vegetable: 0,
-            fruit: 0,
-            water: 0
-        };
-    }
-    return dateData;
-}
-
 // 计算每分钟累积的额度
 function calculateAccumulationRates() {
     const rates = {};
@@ -43,8 +29,8 @@ function calculateAccumulationRates() {
     return rates;
 }
 
-// 更新累积额度
-function updateAccumulatedQuotas() {
+// 更新可用额度
+function updateAvailableQuotas() {
     const now = Date.now();
     const timeDiffMinutes = (now - lastUpdateTime) / (1000 * 60); // 转换为分钟
     
@@ -53,7 +39,7 @@ function updateAccumulatedQuotas() {
     const accumulationRates = calculateAccumulationRates();
     const todayKey = getDateKey(new Date());
     
-    // 确保今天的数据存在并初始化累积数据
+    // 确保今天的数据存在
     if (!intakeData[todayKey]) {
         intakeData[todayKey] = {
             dairy: 0,
@@ -64,30 +50,50 @@ function updateAccumulatedQuotas() {
             egg: false,
             seafood: false,
             history: [],
-            accumulated: {
+            available: {
                 dairy: 0,
                 meat: 0,
                 vegetable: 0,
                 fruit: 0,
                 water: 0
-            }
+            },
+            lastAvailableUpdate: now
         };
     } else {
-        // 确保累积数据存在
-        intakeData[todayKey] = initializeAccumulatedData(intakeData[todayKey]);
+        // 确保可用额度数据存在
+        if (!intakeData[todayKey].available) {
+            intakeData[todayKey].available = {
+                dairy: 0,
+                meat: 0,
+                vegetable: 0,
+                fruit: 0,
+                water: 0
+            };
+        }
+        if (!intakeData[todayKey].lastAvailableUpdate) {
+            intakeData[todayKey].lastAvailableUpdate = now;
+        }
     }
     
-    // 更新累积额度
+    // 更新可用额度
     Object.keys(accumulationRates).forEach(type => {
-        const currentAccumulated = intakeData[todayKey].accumulated[type] || 0;
+        const target = intakeTargets[type];
+        const currentAvailable = intakeData[todayKey].available[type] || 0;
         const additional = accumulationRates[type] * timeDiffMinutes;
-        const newAccumulated = Math.min(
-            currentAccumulated + additional,
-            intakeTargets[type].max
+        
+        // 可用额度增长，但不超过最大值
+        let newAvailable = Math.min(
+            currentAvailable + additional,
+            target.max
         );
-        intakeData[todayKey].accumulated[type] = newAccumulated;
+        
+        // 确保可用额度不会因为时间累积而超过最大值
+        newAvailable = Math.min(newAvailable, target.max);
+        
+        intakeData[todayKey].available[type] = newAvailable;
     });
     
+    intakeData[todayKey].lastAvailableUpdate = now;
     lastUpdateTime = now;
     localStorage.setItem('lastUpdateTime', lastUpdateTime.toString());
     localStorage.setItem('intakeData', JSON.stringify(intakeData));
@@ -161,45 +167,56 @@ function getCurrentDateData() {
             egg: false,
             seafood: false,
             history: [],
-            accumulated: {
+            available: {
                 dairy: 0,
                 meat: 0,
                 vegetable: 0,
                 fruit: 0,
                 water: 0
-            }
+            },
+            lastAvailableUpdate: Date.now()
         };
     } else {
-        // 确保累积数据存在
-        intakeData[dateKey] = initializeAccumulatedData(intakeData[dateKey]);
+        // 确保可用额度数据存在
+        if (!intakeData[dateKey].available) {
+            intakeData[dateKey].available = {
+                dairy: 0,
+                meat: 0,
+                vegetable: 0,
+                fruit: 0,
+                water: 0
+            };
+        }
+        if (!intakeData[dateKey].lastAvailableUpdate) {
+            intakeData[dateKey].lastAvailableUpdate = Date.now();
+        }
     }
     return intakeData[dateKey];
 }
 
-// 计算可用额度（累积额度 - 已使用额度）
-function calculateAvailableQuota(type, dateData) {
+// 获取可用额度
+function getAvailableQuota(type, dateData) {
     const target = intakeTargets[type];
-    const accumulated = (dateData.accumulated && dateData.accumulated[type]) ? dateData.accumulated[type] : 0;
-    const consumed = dateData[type] || 0;
+    const available = (dateData.available && dateData.available[type]) ? dateData.available[type] : 0;
     
-    return Math.max(0, accumulated - consumed);
+    // 确保不超过最大值
+    return Math.min(available, target.max);
 }
 
-// 计算进度条百分比（基于累积额度）
+// 计算进度条百分比（基于可用额度）
 function calculateProgressPercentage(type, dateData) {
     const target = intakeTargets[type];
-    const accumulated = (dateData.accumulated && dateData.accumulated[type]) ? dateData.accumulated[type] : 0;
+    const available = getAvailableQuota(type, dateData);
     
-    // 进度条显示累积额度占最大值的百分比
-    return Math.min((accumulated / target.max) * 100, 100);
+    // 进度条显示可用额度占最大值的百分比
+    return Math.min((available / target.max) * 100, 100);
 }
 
 // 获取状态
 function getQuotaStatus(type, dateData) {
     const target = intakeTargets[type];
-    const accumulated = (dateData.accumulated && dateData.accumulated[type]) ? dateData.accumulated[type] : 0;
     const consumed = dateData[type] || 0;
-    const available = calculateAvailableQuota(type, dateData);
+    const available = getAvailableQuota(type, dateData);
     
     if (consumed <= target.min) {
         return { status: 'normal', text: '正常' };
@@ -218,10 +235,10 @@ function getProgressBarClass(status) {
 // 更新配额显示
 function updateQuotaDisplay(type, dateData) {
     const target = intakeTargets[type];
-    const available = calculateAvailableQuota(type, dateData);
+    const available = getAvailableQuota(type, dateData);
     const percentage = calculateProgressPercentage(type, dateData);
     const status = getQuotaStatus(type, dateData);
-    const accumulated = (dateData.accumulated && dateData.accumulated[type]) ? dateData.accumulated[type] : 0;
+    const consumed = dateData[type] || 0;
     
     // 更新进度条
     const bar = document.getElementById(`${type}Bar`);
@@ -236,10 +253,25 @@ function updateQuotaDisplay(type, dateData) {
     statusElement.textContent = status.text;
     statusElement.className = `intake-status status-${status.status}`;
     
-    // 更新最小值标记位置（基于累积额度计算）
+    // 更新最小值标记位置
     const minMarker = document.getElementById(`${type}MinMarker`);
     const minPercentage = (target.min / target.max) * 100;
     minMarker.style.left = `${minPercentage}%`;
+    
+    // 调试信息
+    console.log(`${type}: 可用=${Math.round(available)}, 已用=${Math.round(consumed)}, 进度=${Math.round(percentage)}%`);
+}
+
+// 消耗额度
+function consumeQuota(type, amount, dateData) {
+    const currentAvailable = getAvailableQuota(type, dateData);
+    
+    if (currentAvailable >= amount) {
+        // 减少可用额度
+        dateData.available[type] = currentAvailable - amount;
+        return true;
+    }
+    return false;
 }
 
 // 更新特殊要求状态
@@ -341,6 +373,10 @@ function deleteHistoryItem(index) {
     // 从总量中减去
     dateData[item.type] -= item.amount;
     
+    // 恢复可用额度
+    const currentAvailable = getAvailableQuota(item.type, dateData);
+    dateData.available[item.type] = currentAvailable + item.amount;
+    
     // 如果删除的是鸡蛋或水产品，更新特殊要求状态
     if (item.category === '鸡蛋') {
         dateData.egg = false;
@@ -366,7 +402,7 @@ function checkAlerts(dateData) {
     
     // 检查是否超过可用额度
     Object.keys(intakeTargets).forEach(type => {
-        const available = calculateAvailableQuota(type, dateData);
+        const available = getAvailableQuota(type, dateData);
         const consumed = dateData[type] || 0;
         
         if (available <= 0 && consumed > 0) {
@@ -409,8 +445,8 @@ function getTypeName(type) {
 
 // 更新UI
 function updateUI() {
-    // 先更新累积额度
-    updateAccumulatedQuotas();
+    // 先更新可用额度
+    updateAvailableQuotas();
     
     const dateData = getCurrentDateData();
     
@@ -500,7 +536,7 @@ function updateModalTitle(type) {
 
 // 检查是否有足够额度
 function hasEnoughQuota(type, amount, dateData) {
-    const available = calculateAvailableQuota(type, dateData);
+    const available = getAvailableQuota(type, dateData);
     return available >= amount;
 }
 
@@ -549,8 +585,14 @@ intakeForm.addEventListener('submit', (e) => {
     // 检查额度
     const dateData = getCurrentDateData();
     if (!hasEnoughQuota(type, amount, dateData)) {
-        const available = calculateAvailableQuota(type, dateData);
+        const available = getAvailableQuota(type, dateData);
         alert(`额度不足！可用额度: ${Math.round(available)}${getUnit(type)}，需要: ${amount}${getUnit(type)}`);
+        return;
+    }
+    
+    // 消耗额度
+    if (!consumeQuota(type, amount, dateData)) {
+        alert(`额度不足！`);
         return;
     }
     
@@ -587,7 +629,7 @@ intakeForm.addEventListener('submit', (e) => {
 
 // 每分钟更新一次额度
 setInterval(() => {
-    updateAccumulatedQuotas();
+    updateAvailableQuotas();
     if (selectedDate.toDateString() === new Date().toDateString()) {
         updateUI();
     }
@@ -609,13 +651,14 @@ if (Object.keys(intakeData).length === 0) {
         egg: false,
         seafood: false,
         history: [],
-        accumulated: {
+        available: {
             dairy: intakeTargets.dairy.max, // 初始给满额度
             meat: intakeTargets.meat.max,
             vegetable: intakeTargets.vegetable.max,
             fruit: intakeTargets.fruit.max,
             water: intakeTargets.water.max
-        }
+        },
+        lastAvailableUpdate: Date.now()
     };
     
     updateUI();
